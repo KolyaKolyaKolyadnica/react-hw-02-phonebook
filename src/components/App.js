@@ -22,31 +22,18 @@ class App extends Component {
       return;
     }
 
-    let newContactIsUniq = true;
-    this.state.contacts.forEach(contact => {
-      if (contact.name === name && contact.number === number) {
-        alert(`${contact.name} is already in contacts with this number`);
-        newContactIsUniq = false;
-        return;
-      }
-      if (contact.name !== name && contact.number === number) {
-        alert(`${contact.name} already has that number`);
-        newContactIsUniq = false;
-        return;
-      }
-    });
-    if (!newContactIsUniq) {
-      return;
+    if (this.state.contacts.some(contact => contact.name === name)) {
+      return alert('This contact already exists');
     }
 
-    const newContacts = {
+    const newContact = {
       id: nanoid(),
       name,
       number,
     };
 
     this.setState(prevState => ({
-      contacts: [newContacts, ...prevState.contacts],
+      contacts: [newContact, ...prevState.contacts],
       name: '',
       number: '',
     }));
@@ -65,7 +52,11 @@ class App extends Component {
   };
 
   render() {
-    const { contacts, filter } = this.state;
+    const { filter } = this.state;
+    const normalizedFilter = this.state.filter.toLocaleLowerCase();
+    const visibleContacts = this.state.contacts.filter(contact =>
+      contact.name.toLocaleLowerCase().includes(normalizedFilter)
+    );
 
     return (
       <div className={style.container}>
@@ -79,7 +70,7 @@ class App extends Component {
         <div className={style.contacts}>
           <h2>Contacts</h2>
           <ContactList
-            contacts={contacts}
+            contacts={visibleContacts}
             filterValue={filter}
             onDeleteContact={this.deleteContact}
           />
